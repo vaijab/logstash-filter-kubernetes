@@ -45,7 +45,7 @@ class LogStash::Filters::Kubernetes < LogStash::Filters::Base
   public
   def filter(event)
 
-    if @source
+    if @source and event[@source]
       parts = event[@source].split(File::SEPARATOR).last.gsub(/.log$/, '').split('_')
 
       # We do not care about empty POD log files

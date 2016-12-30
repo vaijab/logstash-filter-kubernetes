@@ -36,17 +36,11 @@ class LogStash::Filters::Kubernetes < LogStash::Filters::Base
   # The target field name to write event kubernetes metadata.
   config :target, :validate => :string, :default => "kubernetes"
 
+  def register; end
 
-  public
-  def register
-    # Nothing to do
-  end # def register
-
-  public
   def filter(event)
-
-    if @source and event[@source]
-      parts = event[@source].split(File::SEPARATOR).last.gsub(/.log$/, '').split('_')
+    if @source and event.get(@source)
+      parts = event.get(@source).split(File::SEPARATOR).last.gsub(/.log$/, '').split('_')
 
       # We do not care about empty POD log files
       if parts.length != 3 || parts[2].start_with?('POD-')
@@ -59,11 +53,10 @@ class LogStash::Filters::Kubernetes < LogStash::Filters::Base
         kubernetes['container_name'] = parts[2].gsub(/-[0-9a-z]*$/, '')
         kubernetes['container_id'] = parts[2].split('-').last
 
-        event[@target] = kubernetes
+        event.set(@target, kubernetes)
       end
     end
 
-    # filter_matched should go in the last line of our successful code
     filter_matched(event)
-  end # def filter
-end # class LogStash::Filters::Kubernetes
+  end
+end
